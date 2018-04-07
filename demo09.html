@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>变量提升</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      //状态提升是通过将state数据提升至离需要这些数据的组件最近的父组件中
+      const scaleNames = {
+        c:'celsius',
+        f:'fahrenheit'
+      };
+      function toCelsius(fahrenheit) {
+        return (fahrenheit - 32) * 5 / 9;
+      }
+
+      function toFahrenheit(celsius) {
+        return (celsius * 9 / 5) + 32;
+      }
+
+      function tryConvert(temperature,convert) {
+        const input = parseFloat(temperature);
+        if(Number.isNaN(input)){
+            return ''
+        }
+        const output = convert(input)
+        const rounded = Math.round(output * 1000)/1000
+        return rounded.toString()
+      }
+
+      function Boiling(props) {
+        if(props.celsius >= 100){
+          return <p>boil</p>
+        }
+        return <p> not boil </p>
+      }
+
+      class TemperatureInput extends React.Component {
+        constructor(props) {
+          super(props)
+          this.handleChange = this.handleChange.bind(this)
+        }
+        handleChange(e){
+            this.props.onTemperatureChange(e.target.value)
+        }
+
+        render() {
+          const temperature = this.props.temperature
+          const scale = this.props.scale
+          return (
+            <fieldset>
+              <legend>Enter in {scaleNames[scale]}:</legend>
+              <input value={temperature} onChange={this.handleChange} />
+            </fieldset>
+          )
+        }
+      }
+      class Calculator extends React.Component{
+          constructor(props){
+              super(props);
+              this.handleCelsiusChange = this.handleCelsiusChange(this);
+              this.handleFahrenheitChange = this.handleFahrenheitChange(this);
+              this.state = {temperature:'',scale:'c'}
+          }
+          handleCelsiusChange(temperature){
+              this.setState({scale:'c',temperature})
+          }
+          handleFahrenheitChange(temperature){
+              this.setState({scale:'f',temperature})
+          }
+          render() {
+              const scale = this.state.scale
+              const temperature = this.state.temperature
+              const celsius = scale === 'f' ? tryConvert(temperature,toCelsius) : temperature
+              const fahrenheit = scale === 'c' ? tryConvert(temperature,toFahrenheit) :temperature
+              
+              return (
+                <div>
+                  <TemperatureInput
+                    scale='c'
+                    temperature={celsius}
+                    onTemperatureChange={this.handleCelsiusChange} />
+                 <TemperatureInput
+                   scale='f'
+                   temperature={fahrenheit}
+                   onTemperatureChange={this.handleFahrenheitChange} />
+                 <Boiling celsius={parseFloat(celsius)} />
+                 </div>
+              )
+            }
+      }
+      ReactDOM.render(
+        <Calculator />,
+        document.getElementById('root')
+      );
+      /*
+      1 react在dom原生组件input上调用指定的onchange函数。在本例中指的是
+        temperatureInput组件中的handleChange函数
+      2 temperatireInput组件的handleChange函数会在值发生变化时调用this.props.ontemperaturechange函数
+         这些props属性，像ontemperatureChange都是由父组件calculator提供的
+      3 最开始渲染时，calculator组件把内部的handlecelsiuschange方法指定给摄氏度输入组件temperatureInput的
+        ontemperaturechange方法，并且把handlefahrenheitchange方法指定给华氏度输入组件temperatureInput的
+        ontemperaturcehange。两个calculator内部的方法会在相应输入框被编辑时调用。
+      4 在这些方法内部，calculator组件会让react使用编辑输入的新值和当前输入框的温标来调用this.set
+        state()方法来重新渲染自身
+      5 react会调用calculator组件的render方法来识别ui界面的样子。基于当前的温度和温，标两个输入框的值会被重新计算。
+        温度转换就是在这里执行的
+     6 接着react会使用calculator指定的新props来分别调用temperatureInput组件，react也会识别出子组件的ui界面。
+     7 reactdom 会更新dom来匹配对应的值。我们编辑输入框获取新值，另一个输入框更新经过转换的温度值
+      */
+
+    </script>
+    <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      To set up a production-ready React build environment, follow these instructions:
+      * https://reactjs.org/docs/add-react-to-a-new-app.html
+      * https://reactjs.org/docs/add-react-to-an-existing-app.html
+
+      You can also use React without JSX, in which case you can remove Babel:
+      * https://reactjs.org/docs/react-without-jsx.html
+      * https://reactjs.org/docs/cdn-links.html
+    -->
+  </body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+    /*
+      function Clock(props) {
+        return (
+          <div>
+            <h1>hello react</h1>
+            <h2>It is {props.date.toLocaleTimeString()} </h2>
+          </div>
+        )
+      }*/
+      //Clock被定义为一个类，使用类就允许使用其他特性，例如局部状态，生命周期钩子
+    /*  class Clock extends React.Component {
+        render() {
+          return (
+            <div>
+              <h1>hello react</h1>
+              <h2>It is {props.date.toLocaleTimeString()} </h2>
+            </div>
+          )
+        }
+      }*/
+      //为一个类添加局部状态
+      class Clock extends React.Component{
+        //添加一个类构造函数来初始化状态this.state
+        constructor(props) {
+          super(props);
+          this.state = {date:new Date()};
+        }
+        //挂载
+        componentDidMount() {
+          this.timer = setInterval(
+            () => this.tick(),
+            1000
+          );
+        }
+        //卸载
+        componentWillUnmount() {
+          clearInterval(this.timer)
+        }
+        render() {
+          return (
+            <div>
+              <h1>hello react</h1>
+              <h2>It is {this.state.date.toLocaleTimeString()} </h2>
+            </div>
+          )
+        }
+      }
+     
+      ReactDOM.render(
+        //clock元素移除date属性
+        <Clock />,
+        document.getElementById('root')
+      )
+      /*
+      1clock 被传递给reactdom.render时，react调用clock组件的构造函数。
+      由于clock显示需要当前时间，所以使用包含当前时间的对象来初始化this.state
+      稍后会更新此状态。
+      2react调用clock组件的render方法。这是react了解屏幕上应该显示什么
+      然后react更新dom以匹配clock的渲染输出
+      3当clock的输出插入到dom时，react调用componentdidmount生命周期钩子
+      在其中，clock组件要求浏览器设置一个定时器，每秒钟调用一次tick
+      4浏览器每秒钟调用tick方法。在其中，clock组件通过使用包含当前时间对象调用
+      setstate来调度ui更新。通过调用setstate，react知道状态已经改变，并再次调用
+      render方法来确定屏幕上应当显示什么。这一次，render方法中的this，state。date
+      将不同，所以渲染输出将包含更新的时间，并相应的更新dom
+      5一旦clock组件被从dom中移除，react会调用componentwillunmount这个钩子函数
+      定时器会被清除
+      */
+      /*
+      function tick() {
+        ReactDOM.render(
+        <Clock date={new Date()} />,
+        document.getElementById('root')
+      );
+      }*/
+      
+      //异步更新状态
+      /*
+      this.setState((prevState,props) => ({
+        counter: prevState.counter + props.increment
+      }))*/
+
+      //setInterval(tick,1000)
+
+    </script>
+    <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      To set up a production-ready React build environment, follow these instructions:
+      * https://reactjs.org/docs/add-react-to-a-new-app.html
+      * https://reactjs.org/docs/add-react-to-an-existing-app.html
+
+      You can also use React without JSX, in which case you can remove Babel:
+      * https://reactjs.org/docs/react-without-jsx.html
+      * https://reactjs.org/docs/cdn-links.html
+    -->
+  </body>
+</html>
